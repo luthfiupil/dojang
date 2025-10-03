@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: dojangdb
+    restart: always
+    environment:
+      POSTGRES_USER: dojanguser
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: dojangdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: dojang-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: luthfiqualityassurance@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: secret
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+  migrate:
+    image: migrate/migrate
+    container_name: dojang-migrate
+    command: [
+      "-path", "/migrations",
+      "-database", "postgres://dojanguser:secret@localhost:5432/dijangdb?sslmode=disable",
+      "up"
+    ]
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
